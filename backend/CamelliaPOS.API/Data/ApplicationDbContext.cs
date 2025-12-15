@@ -17,6 +17,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<OrderItem> OrderItems { get; set; }
     public DbSet<Waste> Wastes { get; set; }
     public DbSet<HappyHour> HappyHours { get; set; }
+    public DbSet<Settings> Settings { get; set; }
+    public DbSet<StockLog> StockLogs { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -90,6 +93,20 @@ public class ApplicationDbContext : DbContext
                   .WithMany()
                   .HasForeignKey(w => w.UserId)
                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // StockLog configuration
+        modelBuilder.Entity<StockLog>(entity =>
+        {
+            entity.HasOne(sl => sl.MenuItem)
+                  .WithMany()
+                  .HasForeignKey(sl => sl.MenuItemId)
+                  .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(sl => sl.User)
+                  .WithMany()
+                  .HasForeignKey(sl => sl.UserId)
+                  .OnDelete(DeleteBehavior.SetNull);
         });
 
         // Seed initial data
@@ -183,6 +200,16 @@ public class ApplicationDbContext : DbContext
         happyHour.DayOfWeek = new List<int> { 1, 2, 3, 4, 5, 6 }; // Monday to Saturday
         
         modelBuilder.Entity<HappyHour>().HasData(happyHour);
+
+        // Seed settings
+        modelBuilder.Entity<Settings>().HasData(new Settings
+        {
+            Id = 1,
+            TaxPercentage = 0,
+            Currency = "LKR",
+            SessionTimeoutMinutes = 30,
+            UpdatedAt = DateTime.UtcNow
+        });
     }
 }
 
