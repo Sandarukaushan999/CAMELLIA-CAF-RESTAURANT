@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using CamelliaPOS.API.Data;
 using CamelliaPOS.API.Models;
+using System.Text;
 
 namespace CamelliaPOS.API.Controllers;
 
@@ -17,6 +18,39 @@ public class AnalyticsController : ControllerBase
     {
         _context = context;
     }
+
+        [HttpGet("bestsellers")]
+        public async Task<IActionResult> GetBestSellers([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, [FromQuery] int top = 10)
+        {
+            var start = startDate ?? DateTime.UtcNow.AddDays(-7);
+            var end = endDate ?? DateTime.UtcNow;
+
+            var orders = await _context.Orders
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                .Where(o => o.OrderDate >= start && o.OrderDate <= end)
+                .ToListAsync();
+
+            var topItems = orders
+                .SelectMany(o => o.OrderItems)
+                .GroupBy(oi => oi.MenuItem.Name)
+                .Select(g => new
+                {
+                    ItemName = g.Key,
+                    Quantity = g.Sum(oi => oi.Quantity),
+                    Revenue = g.Sum(oi => oi.TotalPrice)
+                })
+                .OrderByDescending(x => x.Quantity)
+                .Take(top)
+                .ToList();
+
+            return Ok(new
+            {
+                StartDate = start,
+                EndDate = end,
+                TopItems = topItems
+            });
+        }
 
     [HttpGet("daily")]
     public async Task<IActionResult> GetDailySales([FromQuery] DateTime date)
@@ -52,11 +86,25 @@ public class AnalyticsController : ControllerBase
             .Take(10)
             .ToList();
 
+        var leastItems = orders
+            .SelectMany(o => o.OrderItems)
+            .GroupBy(oi => oi.MenuItem.Name)
+            .Select(g => new
+            {
+                ItemName = g.Key,
+                Quantity = g.Sum(oi => oi.Quantity),
+                Revenue = g.Sum(oi => oi.TotalPrice)
+            })
+            .OrderBy(x => x.Quantity)
+            .Take(10)
+            .ToList();
+
         var totalRevenue = orders.Sum(o => o.Total);
         var totalCost = orders
             .SelectMany(o => o.OrderItems)
             .Sum(oi => oi.MenuItem.Cost * oi.Quantity);
         var totalProfit = totalRevenue - totalCost;
+        var averageOrderValue = orders.Count > 0 ? totalRevenue / orders.Count : 0;
 
         var wasteCost = await _context.Wastes
             .Where(w => w.WasteDate >= startDate && w.WasteDate < endDate)
@@ -70,8 +118,10 @@ public class AnalyticsController : ControllerBase
             TotalProfit = totalProfit - wasteCost,
             WasteCost = wasteCost,
             OrderCount = orders.Count,
+            AverageOrderValue = averageOrderValue,
             HourlySales = hourlySales,
-            TopItems = topItems
+            TopItems = topItems,
+            LeastItems = leastItems
         });
     }
 
@@ -99,6 +149,7 @@ public class AnalyticsController : ControllerBase
             EndDate = endDate.Date,
             TotalRevenue = orders.Sum(o => o.Total),
             OrderCount = orders.Count,
+            AverageOrderValue = orders.Count > 0 ? orders.Sum(o => o.Total) / orders.Count : 0,
             DailySales = dailySales
         });
     }
@@ -128,6 +179,7 @@ public class AnalyticsController : ControllerBase
             Month = month,
             TotalRevenue = orders.Sum(o => o.Total),
             OrderCount = orders.Count,
+            AverageOrderValue = orders.Count > 0 ? orders.Sum(o => o.Total) / orders.Count : 0,
             DailySales = dailySales
         });
     }
@@ -156,6 +208,7 @@ public class AnalyticsController : ControllerBase
             Year = year,
             TotalRevenue = orders.Sum(o => o.Total),
             OrderCount = orders.Count,
+            AverageOrderValue = orders.Count > 0 ? orders.Sum(o => o.Total) / orders.Count : 0,
             MonthlySales = monthlySales
         });
     }
@@ -194,6 +247,37 @@ public class AnalyticsController : ControllerBase
             Profit = profit,
             ProfitMargin = profitMargin
         });
+    }
+
+    [HttpGet("export/csv")]
+    public async Task<IActionResult> ExportCsv([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
+    {
+        var start = startDate ?? DateTime.UtcNow.AddDays(-30);
+        var end = endDate ?? DateTime.UtcNow;
+
+        var orders = await _context.Orders
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.MenuItem)
+            .Where(o => o.OrderDate >= start && o.OrderDate <= end)
+            .OrderBy(o => o.OrderDate)
+            .ToListAsync();
+
+        var lines = new List<string>
+        {
+            "OrderNumber,OrderDate,Item,Quantity,UnitPrice,Total,PaymentMethod"
+        };
+
+        foreach (var o in orders)
+        {
+            foreach (var item in o.OrderItems)
+            {
+                lines.Add($"{o.OrderNumber},{o.OrderDate:O},{item.MenuItem.Name},{item.Quantity},{item.UnitPrice},{item.TotalPrice},{o.PaymentMethod}");
+            }
+        }
+
+        var bytes = System.Text.Encoding.UTF8.GetBytes(string.Join(Environment.NewLine, lines));
+        var fileName = $"orders_{start:yyyyMMdd}_{end:yyyyMMdd}.csv";
+        return File(bytes, "text/csv", fileName);
     }
 }
 

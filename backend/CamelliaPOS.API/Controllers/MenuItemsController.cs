@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using CamelliaPOS.API.Data;
 using CamelliaPOS.API.DTOs;
 using CamelliaPOS.API.Models;
+using CamelliaPOS.API.Services;
 using System.Security.Claims;
 
 namespace CamelliaPOS.API.Controllers;
@@ -14,10 +15,12 @@ namespace CamelliaPOS.API.Controllers;
 public class MenuItemsController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly AuditService _audit;
 
-    public MenuItemsController(ApplicationDbContext context)
+    public MenuItemsController(ApplicationDbContext context, AuditService audit)
     {
         _context = context;
+        _audit = audit;
     }
 
     [HttpGet("category/{categoryId}")]
@@ -123,6 +126,34 @@ public class MenuItemsController : ControllerBase
         return Ok(dto);
     }
 
+    [HttpGet("all")]
+    [Authorize(Roles = "Admin,Manager,Inventory")]
+    public async Task<IActionResult> GetAllMenuItems()
+    {
+        var items = await _context.MenuItems
+            .Include(m => m.Category)
+            .OrderBy(m => m.Name)
+            .Select(m => new MenuItemDto
+            {
+                Id = m.Id,
+                Name = m.Name,
+                Description = m.Description,
+                Price = m.Price,
+                Cost = m.Cost,
+                ImagePath = m.ImagePath,
+                Barcode = m.Barcode,
+                CategoryId = m.CategoryId,
+                CategoryName = m.Category.Name,
+                IsCombo = m.IsCombo,
+                IsActive = m.IsActive,
+                StockQuantity = m.StockQuantity,
+                ApprovalStatus = m.ApprovalStatus
+            })
+            .ToListAsync();
+
+        return Ok(items);
+    }
+
     [HttpPost]
     [Authorize(Roles = "Admin,Inventory")]
     public async Task<IActionResult> CreateMenuItem([FromBody] CreateMenuItemDto dto)
@@ -149,6 +180,7 @@ public class MenuItemsController : ControllerBase
 
         _context.MenuItems.Add(menuItem);
         await _context.SaveChangesAsync();
+        await _audit.LogAsync("Create", "MenuItem", menuItem.Id, User.FindFirstValue(ClaimTypes.Name), $"Created {menuItem.Name}");
 
         if (dto.IsCombo && dto.ComboItems != null)
         {
@@ -208,6 +240,7 @@ public class MenuItemsController : ControllerBase
         }
 
         await _context.SaveChangesAsync();
+        await _audit.LogAsync("Update", "MenuItem", item.Id, User.FindFirstValue(ClaimTypes.Name), $"Updated {item.Name}");
         return NoContent();
     }
 
@@ -244,6 +277,7 @@ public class MenuItemsController : ControllerBase
 
         item.ApprovalStatus = ApprovalStatus.Approved;
         await _context.SaveChangesAsync();
+        await _audit.LogAsync("Approve", "MenuItem", item.Id, User.FindFirstValue(ClaimTypes.Name));
 
         return NoContent();
     }
@@ -258,8 +292,78 @@ public class MenuItemsController : ControllerBase
 
         item.ApprovalStatus = ApprovalStatus.Rejected;
         await _context.SaveChangesAsync();
+        await _audit.LogAsync("Reject", "MenuItem", item.Id, User.FindFirstValue(ClaimTypes.Name));
 
         return NoContent();
+    }
+
+    [HttpPost("{id}/set-active")]
+    [Authorize(Roles = "Admin,Manager")]
+    public async Task<IActionResult> SetActive(int id, [FromBody] SetActiveDto dto)
+    {
+        var item = await _context.MenuItems.FindAsync(id);
+        if (item == null)
+            return NotFound();
+
+        item.IsActive = dto.IsActive;
+        item.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+        await _audit.LogAsync(dto.IsActive ? "Enable" : "Disable", "MenuItem", item.Id, User.FindFirstValue(ClaimTypes.Name));
+
+        return Ok(new { item.Id, item.IsActive });
+    }
+
+    [HttpGet("low-stock")]
+    [Authorize(Roles = "Admin,Manager,Inventory")]
+    public async Task<IActionResult> GetLowStock()
+    {
+        var items = await _context.MenuItems
+            .Where(m => m.IsActive && m.StockQuantity <= m.MinStockLevel)
+            .OrderBy(m => m.StockQuantity)
+            .Select(m => new
+            {
+                m.Id,
+                m.Name,
+                m.StockQuantity,
+                m.MinStockLevel,
+                Category = m.Category.Name
+            })
+            .ToListAsync();
+
+        return Ok(items);
+    }
+
+    [HttpPost("{id}/adjust-stock")]
+    [Authorize(Roles = "Admin,Manager,Inventory")]
+    public async Task<IActionResult> AdjustStock(int id, [FromBody] StockAdjustmentDto dto)
+    {
+        var item = await _context.MenuItems.FindAsync(id);
+        if (item == null)
+            return NotFound();
+
+        if (item.StockQuantity + dto.QuantityChange < 0)
+            return BadRequest(new { message = "Resulting stock cannot be negative" });
+
+        item.StockQuantity += dto.QuantityChange;
+        item.UpdatedAt = DateTime.UtcNow;
+
+        var username = User.FindFirstValue(ClaimTypes.Name);
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == username);
+
+        var log = new StockLog
+        {
+            MenuItemId = id,
+            QuantityChange = dto.QuantityChange,
+            Reason = dto.Reason,
+            CreatedAt = DateTime.UtcNow,
+            UserId = user?.Id
+        };
+
+        _context.StockLogs.Add(log);
+        await _context.SaveChangesAsync();
+        await _audit.LogAsync("AdjustStock", "MenuItem", id, username, $"Change: {dto.QuantityChange}, Reason: {dto.Reason}");
+
+        return Ok(new { item.StockQuantity });
     }
 }
 

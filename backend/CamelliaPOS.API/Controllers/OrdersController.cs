@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using CamelliaPOS.API.Data;
 using CamelliaPOS.API.DTOs;
 using CamelliaPOS.API.Models;
+using CamelliaPOS.API.Services;
 using System.Security.Claims;
 
 namespace CamelliaPOS.API.Controllers;
@@ -14,10 +15,12 @@ namespace CamelliaPOS.API.Controllers;
 public class OrdersController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
+    private readonly AuditService _audit;
 
-    public OrdersController(ApplicationDbContext context)
+    public OrdersController(ApplicationDbContext context, AuditService audit)
     {
         _context = context;
+        _audit = audit;
     }
 
     [HttpPost]
@@ -146,6 +149,7 @@ public class OrdersController : ControllerBase
 
         _context.Orders.Add(order);
         await _context.SaveChangesAsync();
+        await _audit.LogAsync("Create", "Order", order.Id, username, $"Total: {order.Total}");
 
         var response = await _context.Orders
             .Include(o => o.OrderItems)

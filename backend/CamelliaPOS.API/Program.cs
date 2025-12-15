@@ -75,6 +75,7 @@ builder.Services.AddAuthorization();
 
 // Services
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<AuditService>();
 builder.Services.AddSingleton(_ => new BackupService(databasePath, backupDirectory));
 
 // CORS

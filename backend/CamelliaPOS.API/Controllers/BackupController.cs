@@ -49,6 +49,20 @@ public class BackupController : ControllerBase
         }
     }
 
+    [HttpPost("restore")]
+    public async Task<IActionResult> RestoreBackup([FromForm] IFormFile file)
+    {
+        try
+        {
+            await _backupService.RestoreBackupAsync(file);
+            return Ok(new { message = "Backup restored successfully" });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = $"Error restoring backup: {ex.Message}" });
+        }
+    }
+
     [HttpPost("clean")]
     public IActionResult CleanOldBackups([FromQuery] int keepDays = 30)
     {
