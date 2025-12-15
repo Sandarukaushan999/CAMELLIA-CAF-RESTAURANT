@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\ASUSa\OneDrive\Documents\CAMELLIA CAFÉ & RESTAURANT\frontend\CamelliaPOS.WPF\obj\Debug\net8.0-windows\
+D:\CAMELLIA-CAF-RESTAURANT\frontend\CamelliaPOS.WPF\obj\Debug\net8.0-windows\
 CamelliaPOS.WPF
 none
 false
 TRACE;DEBUG;NET;NET8_0;NETCOREAPP
-C:\Users\ASUSa\OneDrive\Documents\CAMELLIA CAFÉ & RESTAURANT\frontend\CamelliaPOS.WPF\App.xaml
-2-1457342498
+D:\CAMELLIA-CAF-RESTAURANT\frontend\CamelliaPOS.WPF\App.xaml
+6-1115797948
 
-151559166734
-217-1199763835
-Views\LoginWindow.xaml;Views\MainWindow.xaml;
+29-1809418529
+2171406247192
+Views\AnalyticsWindow.xaml;Views\InventoryWindow.xaml;Views\LoginWindow.xaml;Views\LowStockWindow.xaml;Views\MainWindow.xaml;Views\SettingsWindow.xaml;
 
 False
 

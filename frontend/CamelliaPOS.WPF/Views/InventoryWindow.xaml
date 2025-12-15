@@ -1,0 +1,86 @@
+<Window x:Class="CamelliaPOS.WPF.Views.InventoryWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Inventory" Height="500" Width="700"
+        WindowStartupLocation="CenterOwner">
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Add Category -->
+        <StackPanel Grid.Column="0" Margin="0,0,10,0">
+            <TextBlock Text="Add Category" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+            <TextBox Text="{Binding CategoryName, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Name" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding CategoryIcon, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Icon" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding CategoryColor, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Color (hex)" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding CategoryDisplayOrder, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Display Order" Margin="0,0,0,10"/>
+            <Button Content="Create Category" Command="{Binding AddCategoryCommand}"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Background="#8B4513" Foreground="White" Width="150"/>
+        </StackPanel>
+
+        <!-- Add Item -->
+        <StackPanel Grid.Column="1">
+            <TextBlock Text="Add Item" FontSize="18" FontWeight="Bold" Margin="0,0,0,10"/>
+            <ComboBox ItemsSource="{Binding Categories}"
+                      SelectedItem="{Binding SelectedCategory}"
+                      DisplayMemberPath="Name"
+                      materialDesign:HintAssist.Hint="Category"
+                      Margin="0,0,0,5"/>
+            <TextBox Text="{Binding ItemName, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Item Name" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding ItemDescription, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Description" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding ItemPrice, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Selling Price" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding ItemCost, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Cost Price" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding ItemBarcode, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Barcode / SKU" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding ItemImagePath, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Image Path (optional)" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding ItemStock, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Stock Quantity" Margin="0,0,0,5"/>
+            <TextBox Text="{Binding ItemMinStock, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Min Stock Level" Margin="0,0,0,10"/>
+            <Button Content="Create Item" Command="{Binding AddItemCommand}"
+                    Style="{StaticResource MaterialDesignRaisedButton}"
+                    Background="#8B4513" Foreground="White" Width="150"/>
+            <Separator Margin="0,10"/>
+            <TextBlock Text="Items" FontSize="16" FontWeight="Bold" Margin="0,0,0,5"/>
+            <DataGrid ItemsSource="{Binding AllItems}"
+                      AutoGenerateColumns="False"
+                      Height="200"
+                      CanUserAddRows="False"
+                      IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
+                    <DataGridTextColumn Header="Category" Binding="{Binding CategoryName}" Width="120"/>
+                    <DataGridTextColumn Header="Price" Binding="{Binding Price}" Width="80"/>
+                    <DataGridCheckBoxColumn Header="Active" Binding="{Binding IsActive}" Width="60"/>
+                    <DataGridTemplateColumn Header="Toggle" Width="80">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Content="{Binding IsActive, Converter={StaticResource BoolToText}}"
+                                        Command="{Binding DataContext.ToggleActiveCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                        CommandParameter="{Binding}"
+                                        Width="60"/>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </StackPanel>
+    </Grid>
+</Window>
+

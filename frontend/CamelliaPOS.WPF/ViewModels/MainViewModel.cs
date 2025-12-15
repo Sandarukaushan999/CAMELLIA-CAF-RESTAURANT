@@ -12,6 +12,12 @@ public partial class MainViewModel : ObservableObject
     private readonly ApiService _apiService;
 
     [ObservableProperty]
+    private AdminToolsViewModel admin;
+
+    [ObservableProperty]
+    private bool canAccessAdmin;
+
+    [ObservableProperty]
     private ObservableCollection<Category> categories = new();
 
     [ObservableProperty]
@@ -50,7 +56,9 @@ public partial class MainViewModel : ObservableObject
     public MainViewModel(ApiService apiService)
     {
         _apiService = apiService;
-        LoadCategoriesAsync();
+        Admin = new AdminToolsViewModel(apiService);
+        CanAccessAdmin = App.CurrentRole == "Admin" || App.CurrentRole == "Manager";
+        _ = LoadCategoriesAsync(); // fire and forget on startup
     }
 
     private async Task LoadCategoriesAsync()
@@ -84,7 +92,7 @@ public partial class MainViewModel : ObservableObject
     {
         if (value != null)
         {
-            LoadMenuItemsAsync(value.Id);
+            _ = LoadMenuItemsAsync(value.Id); // fire and forget
         }
     }
     
@@ -219,7 +227,7 @@ public partial class MainViewModel : ObservableObject
                 PaidAmount = PaymentMethod == 0 ? PaidAmount : Total // Card payment = total
             };
 
-            var response = await _apiService.CreateOrderAsync(orderRequest);
+            var (response, error) = await _apiService.CreateOrderAsync(orderRequest);
             
             if (response != null)
             {
@@ -238,7 +246,8 @@ public partial class MainViewModel : ObservableObject
             }
             else
             {
-                MessageBox.Show("Failed to process order", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                var message = string.IsNullOrWhiteSpace(error) ? "Failed to process order" : error;
+                MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         catch (Exception ex)

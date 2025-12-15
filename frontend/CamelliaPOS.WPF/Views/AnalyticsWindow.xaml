@@ -1,0 +1,155 @@
+<Window x:Class="CamelliaPOS.WPF.Views.AnalyticsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Analytics" Height="700" Width="1000"
+        WindowStartupLocation="CenterOwner">
+    <ScrollViewer>
+        <StackPanel Margin="10">
+            <TextBlock Text="Analytics" FontSize="22" FontWeight="Bold" Margin="0,0,0,10"/>
+
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                <StackPanel.Resources>
+                    <Style TargetType="FrameworkElement">
+                        <Setter Property="Margin" Value="0,0,10,0"/>
+                    </Style>
+                </StackPanel.Resources>
+                <StackPanel>
+                    <TextBlock Text="Daily Date"/>
+                    <DatePicker SelectedDate="{Binding SelectedDate}"/>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="Range Start"/>
+                    <DatePicker SelectedDate="{Binding RangeStart}"/>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="Range End"/>
+                    <DatePicker SelectedDate="{Binding RangeEnd}"/>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="Year"/>
+                    <TextBox Text="{Binding Year, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="Month (1-12)"/>
+                    <TextBox Text="{Binding Month, UpdateSourceTrigger=PropertyChanged}" Width="80"/>
+                </StackPanel>
+                <Button Content="Refresh"
+                        Command="{Binding LoadAllCommand}"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Background="#8B4513" Foreground="White"
+                        VerticalAlignment="Bottom"/>
+            </StackPanel>
+
+            <Separator/>
+
+            <TextBlock Text="Daily" FontSize="18" FontWeight="Bold" Margin="0,10,0,5"/>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel.Resources>
+                    <Style TargetType="FrameworkElement">
+                        <Setter Property="Margin" Value="0,0,20,0"/>
+                    </Style>
+                </StackPanel.Resources>
+                <TextBlock Text="{Binding Daily.TotalRevenue, StringFormat='Revenue: {0:C}'}"/>
+                <TextBlock Text="{Binding Daily.TotalProfit, StringFormat='Profit: {0:C}'}"/>
+                <TextBlock Text="{Binding Daily.AverageOrderValue, StringFormat='AOV: {0:C}'}"/>
+                <TextBlock Text="{Binding Daily.OrderCount, StringFormat='Orders: {0}'}"/>
+            </StackPanel>
+            <TextBlock Text="Hourly Sales" FontWeight="Bold"/>
+            <DataGrid ItemsSource="{Binding Hourly}" AutoGenerateColumns="False" Height="150" Margin="0,5,0,10" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Hour" Binding="{Binding Hour}" Width="80"/>
+                    <DataGridTextColumn Header="Revenue" Binding="{Binding Revenue}" Width="120"/>
+                    <DataGridTextColumn Header="Orders" Binding="{Binding Count}" Width="80"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <StackPanel Orientation="Horizontal">
+                <StackPanel.Resources>
+                    <Style TargetType="FrameworkElement">
+                        <Setter Property="Margin" Value="0,0,10,0"/>
+                    </Style>
+                </StackPanel.Resources>
+                <StackPanel Width="450">
+                    <TextBlock Text="Top Items" FontWeight="Bold"/>
+                    <DataGrid ItemsSource="{Binding TopItems}" AutoGenerateColumns="False" Height="150" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Item" Binding="{Binding ItemName}" Width="*"/>
+                            <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="80"/>
+                            <DataGridTextColumn Header="Revenue" Binding="{Binding Revenue}" Width="120"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+                <StackPanel Width="450">
+                    <TextBlock Text="Least Items" FontWeight="Bold"/>
+                    <DataGrid ItemsSource="{Binding LeastItems}" AutoGenerateColumns="False" Height="150" IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Item" Binding="{Binding ItemName}" Width="*"/>
+                            <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="80"/>
+                            <DataGridTextColumn Header="Revenue" Binding="{Binding Revenue}" Width="120"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </StackPanel>
+            </StackPanel>
+
+            <Separator/>
+
+            <TextBlock Text="Weekly" FontSize="18" FontWeight="Bold" Margin="0,10,0,5"/>
+            <DataGrid ItemsSource="{Binding Weekly.DailySales}" AutoGenerateColumns="False" Height="150" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="*"/>
+                    <DataGridTextColumn Header="Revenue" Binding="{Binding Revenue}" Width="120"/>
+                    <DataGridTextColumn Header="Orders" Binding="{Binding Count}" Width="80"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <TextBlock Text="Monthly" FontSize="18" FontWeight="Bold" Margin="0,10,0,5"/>
+            <DataGrid ItemsSource="{Binding MonthlyData.DailySales}" AutoGenerateColumns="False" Height="150" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Date" Binding="{Binding Date}" Width="*"/>
+                    <DataGridTextColumn Header="Revenue" Binding="{Binding Revenue}" Width="120"/>
+                    <DataGridTextColumn Header="Orders" Binding="{Binding Count}" Width="80"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <TextBlock Text="Yearly" FontSize="18" FontWeight="Bold" Margin="0,10,0,5"/>
+            <DataGrid ItemsSource="{Binding YearlyData.MonthlySales}" AutoGenerateColumns="False" Height="150" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Month" Binding="{Binding Month}" Width="80"/>
+                    <DataGridTextColumn Header="Revenue" Binding="{Binding Revenue}" Width="120"/>
+                    <DataGridTextColumn Header="Orders" Binding="{Binding Count}" Width="80"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <Separator/>
+
+            <TextBlock Text="Profit (range)" FontSize="18" FontWeight="Bold" Margin="0,10,0,5"/>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel.Resources>
+                    <Style TargetType="FrameworkElement">
+                        <Setter Property="Margin" Value="0,0,20,0"/>
+                    </Style>
+                </StackPanel.Resources>
+                <TextBlock Text="{Binding Profit.Revenue, StringFormat='Revenue: {0:C}'}"/>
+                <TextBlock Text="{Binding Profit.Cost, StringFormat='Cost: {0:C}'}"/>
+                <TextBlock Text="{Binding Profit.WasteCost, StringFormat='Waste: {0:C}'}"/>
+                <TextBlock Text="{Binding Profit.Profit, StringFormat='Profit: {0:C}'}"/>
+                <TextBlock Text="{Binding Profit.ProfitMargin, StringFormat='Margin: {0:F2}%'}"/>
+            </StackPanel>
+
+            <TextBlock Text="Best Sellers" FontSize="18" FontWeight="Bold" Margin="10,10,0,5"/>
+            <DataGrid ItemsSource="{Binding BestSellers.TopItems}" AutoGenerateColumns="False" Height="150" IsReadOnly="True">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Item" Binding="{Binding ItemName}" Width="*"/>
+                    <DataGridTextColumn Header="Qty" Binding="{Binding Quantity}" Width="80"/>
+                    <DataGridTextColumn Header="Revenue" Binding="{Binding Revenue}" Width="120"/>
+                </DataGrid.Columns>
+            </DataGrid>
+
+        </StackPanel>
+    </ScrollViewer>
+</Window>
+

@@ -45,8 +45,11 @@ public partial class LoginViewModel : ObservableObject
             
             if (response != null)
             {
+                App.CurrentRole = response.Role;
+                App.CurrentUsername = response.Username;
                 // Navigate to main POS window
                 var mainWindow = new MainWindow();
+                Application.Current.MainWindow = mainWindow;
                 mainWindow.Show();
                 
                 // Close login window

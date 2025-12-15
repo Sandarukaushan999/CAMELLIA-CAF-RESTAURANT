@@ -17,18 +17,47 @@
         </Grid.RowDefinitions>
         
         <!-- Header -->
-        <Border Grid.Row="0" Background="#8B4513" Padding="15">
-            <Grid>
+        <Border Grid.Row="0" Background="#8B4513" Padding="10">
+            <DockPanel>
+                <DockPanel.Resources>
+                    <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+                </DockPanel.Resources>
                 <TextBlock Text="☕ CAMELLIA CAFÉ &amp; RESTAURANT - POS SYSTEM" 
                           FontSize="24" FontWeight="Bold" 
                           Foreground="White" 
-                          VerticalAlignment="Center"/>
-                <TextBlock x:Name="TimeDisplay"
-                          FontSize="14" 
-                          Foreground="White" 
-                          HorizontalAlignment="Right" 
-                          VerticalAlignment="Center"/>
-            </Grid>
+                          VerticalAlignment="Center"
+                          DockPanel.Dock="Left"/>
+                
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right"
+                            Visibility="{Binding CanAccessAdmin, Converter={StaticResource BoolToVis}}">
+                    <Button Content="Settings"
+                            Margin="0,0,5,0"
+                            Command="{Binding Admin.OpenSettingsCommand}"/>
+                    <Button Content="Inventory"
+                            Margin="0,0,5,0"
+                            Command="{Binding Admin.OpenInventoryCommand}"/>
+                    <Button Content="Analytics"
+                            Margin="0,0,5,0"
+                            Command="{Binding Admin.OpenAnalyticsCommand}"/>
+                    <Button Content="Low Stock"
+                            Margin="0,0,5,0"
+                            Command="{Binding Admin.OpenLowStockCommand}"/>
+                    <Button Content="Backup"
+                            Margin="0,0,5,0"
+                            Command="{Binding Admin.CreateBackupCommand}"/>
+                    <Button Content="Restore"
+                            Margin="0,0,5,0"
+                            Command="{Binding Admin.RestoreBackupCommand}"/>
+                    <Button Content="Export CSV"
+                            Margin="0,0,5,0"
+                            Command="{Binding Admin.ExportCsvCommand}"/>
+                    <TextBlock x:Name="TimeDisplay"
+                               FontSize="14" 
+                               Foreground="White" 
+                               VerticalAlignment="Center"
+                               Margin="10,0,0,0"/>
+                </StackPanel>
+            </DockPanel>
         </Border>
         
         <!-- Main Content -->

@@ -1235,19 +1235,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\ASUSa\\.nuget\\packages\\": {}
+    "C:\\Users\\Methmi Pathirana\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\ASUSa\\OneDrive\\Documents\\CAMELLIA CAFÉ & RESTAURANT\\frontend\\CamelliaPOS.WPF\\CamelliaPOS.WPF.csproj",
+      "projectUniqueName": "D:\\CAMELLIA-CAF-RESTAURANT\\frontend\\CamelliaPOS.WPF\\CamelliaPOS.WPF.csproj",
       "projectName": "CamelliaPOS.WPF",
-      "projectPath": "C:\\Users\\ASUSa\\OneDrive\\Documents\\CAMELLIA CAFÉ & RESTAURANT\\frontend\\CamelliaPOS.WPF\\CamelliaPOS.WPF.csproj",
-      "packagesPath": "C:\\Users\\ASUSa\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\ASUSa\\OneDrive\\Documents\\CAMELLIA CAFÉ & RESTAURANT\\frontend\\CamelliaPOS.WPF\\obj\\",
+      "projectPath": "D:\\CAMELLIA-CAF-RESTAURANT\\frontend\\CamelliaPOS.WPF\\CamelliaPOS.WPF.csproj",
+      "packagesPath": "C:\\Users\\Methmi Pathirana\\.nuget\\packages\\",
+      "outputPath": "D:\\CAMELLIA-CAF-RESTAURANT\\frontend\\CamelliaPOS.WPF\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\ASUSa\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Methmi Pathirana\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0-windows"
