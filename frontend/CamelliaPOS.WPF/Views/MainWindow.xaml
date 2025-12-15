@@ -39,9 +39,15 @@
                     <Button Content="Analytics"
                             Margin="0,0,5,0"
                             Command="{Binding Admin.OpenAnalyticsCommand}"/>
-                    <Button Content="Low Stock"
-                            Margin="0,0,5,0"
-                            Command="{Binding Admin.OpenLowStockCommand}"/>
+                    <Button Margin="0,0,5,0"
+                            Command="{Binding Admin.OpenLowStockCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Low Stock"/>
+                            <TextBlock Text="{Binding LowStockCount, StringFormat=' ({0})'}"
+                                       Margin="5,0,0,0"
+                                       FontWeight="Bold"/>
+                        </StackPanel>
+                    </Button>
                     <Button Content="Backup"
                             Margin="0,0,5,0"
                             Command="{Binding Admin.CreateBackupCommand}"/>

@@ -18,6 +18,9 @@ public partial class MainViewModel : ObservableObject
     private bool canAccessAdmin;
 
     [ObservableProperty]
+    private int lowStockCount;
+
+    [ObservableProperty]
     private ObservableCollection<Category> categories = new();
 
     [ObservableProperty]
@@ -59,6 +62,10 @@ public partial class MainViewModel : ObservableObject
         Admin = new AdminToolsViewModel(apiService);
         CanAccessAdmin = App.CurrentRole == "Admin" || App.CurrentRole == "Manager";
         _ = LoadCategoriesAsync(); // fire and forget on startup
+        if (CanAccessAdmin)
+        {
+            _ = RefreshLowStockCountAsync();
+        }
     }
 
     private async Task LoadCategoriesAsync()
@@ -194,6 +201,22 @@ public partial class MainViewModel : ObservableObject
         Subtotal = CartItems.Sum(c => c.TotalPrice);
         Total = Subtotal - Discount + Tax;
         Balance = PaidAmount - Total;
+    }
+
+    public async Task RefreshLowStockCountAsync()
+    {
+        if (!CanAccessAdmin)
+            return;
+
+        try
+        {
+            var lowStockItems = await _apiService.GetLowStockAsync();
+            LowStockCount = lowStockItems?.Count ?? 0;
+        }
+        catch
+        {
+            // Ignore errors when refreshing low stock count to avoid impacting POS usage
+        }
     }
 
     [RelayCommand]

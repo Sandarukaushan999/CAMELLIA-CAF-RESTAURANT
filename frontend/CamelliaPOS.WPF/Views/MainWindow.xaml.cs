@@ -9,11 +9,13 @@ namespace CamelliaPOS.WPF.Views;
 public partial class MainWindow : Window
 {
     private DispatcherTimer? _timer;
+    private DispatcherTimer? _lowStockTimer;
 
     public MainWindow()
     {
         InitializeComponent();
-        DataContext = new MainViewModel(App.ApiService);
+        var vm = new MainViewModel(App.ApiService);
+        DataContext = vm;
         
         // Update time display
         _timer = new DispatcherTimer
@@ -23,6 +25,21 @@ public partial class MainWindow : Window
         _timer.Tick += (s, e) => TimeDisplay.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
         _timer.Start();
         TimeDisplay.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+        // Periodically refresh low stock count for admin/manager dashboard
+        _lowStockTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMinutes(1)
+        };
+        _lowStockTimer.Tick += async (s, e) =>
+        {
+            if (DataContext is MainViewModel mainVm)
+            {
+                await mainVm.RefreshLowStockCountAsync();
+            }
+        };
+        _lowStockTimer.Start();
+        _ = vm.RefreshLowStockCountAsync();
     }
 
     private void MenuItem_Click(object sender, MouseButtonEventArgs e)
