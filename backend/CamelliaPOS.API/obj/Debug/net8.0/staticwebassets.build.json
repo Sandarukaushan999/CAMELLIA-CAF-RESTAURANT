@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "PVG3s9a2UDMp9UMRZwYbYSrCgwqB5Ht3hsqUU8LS65c=",
+  "Source": "CamelliaPOS.API",
+  "BasePath": "_content/CamelliaPOS.API",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
